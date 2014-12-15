@@ -1,20 +1,16 @@
 const int nbLeds= 9 ; 
 const int offset= 4 ; 
-
 const int delayInMs = 100 ; 
 const int fullLightTime = 1500; 
 const int switchCheckPeriod = 200 ; 
-
 const int dropDelay=400;
-
 
 //with nbLeds and offset properly defined 
 //this allow to index bottom led as 0 in the code 
-int translate(int idx)
+int translate(int ledIdx)
 {
-  return (nbLeds-1 + offset - idx) ; 
+  return (nbLeds-1 + offset - ledIdx) ; 
 }
-
 
 //DS =>downstairs
 int checkDSSwitch()
@@ -22,29 +18,32 @@ int checkDSSwitch()
   return (1 - digitalRead(3)) ;
 }
 
-void blink()
+//provides a signal blinking led 
+// indexed by input argument
+//helpful to understand state of the system 
+void blink(int ledIdx)
 {
   for(int i=0; i < 5 ; ++i )
   {
-    digitalWrite(translate(0), HIGH); 
+    digitalWrite(translate(ledIdx), HIGH); 
     delay(delayInMs);
-    digitalWrite(translate(0), LOW);
+    digitalWrite(translate(ledIdx), LOW);
     delay(delayInMs);    
-  }
-  
+  } 
 }
 
-
+//Sensor remains "ON" for about 30seconds 
+//animation of light may be shorter
+// this method makes sure that sensor is off
 void waitForSwitchOff(){
   while ( checkDSSwitch() )
   {
-    Serial.print("I m waiting \n") ; 
     delay(switchCheckPeriod) ;
   }
-  blink() ; 
+  //blink bottom led to notify that 
+  //sensor is ready 
+  blink(ledIdx) ; 
 }
-
-
 
 int stepHighDelay(int i){
   //purpose is to have animation for any step 
@@ -52,6 +51,7 @@ int stepHighDelay(int i){
   return dropDelay/(nbLeds - i) ; 
 }
 
+//animation
 void spaceship()
 {
   int bottom= 0 ; 
@@ -70,7 +70,6 @@ void spaceship()
   }  
 }
 
-
 void lightOff()
 {
   for(int i=0; i < nbLeds ; ++i )
@@ -79,7 +78,6 @@ void lightOff()
     delay(delayInMs) ; 
   }
 }
-
 
 void light(int direction)
 {  
@@ -91,14 +89,26 @@ void light(int direction)
 
 }
 
-//void welcome(){
-//  light(1) ; 
-//    lightOff();
-//  spaceship() ; 
-//  lightOff();
-//}
+
+void welcome_animation() 
+{
+  for(int i=0; i < nbLeds ; ++i )
+  {
+    digitalWrite(translate(i), HIGH); 
+    delay(delayInMs) ; 
+    digitalWrite(translate(i), LOW); 
+  }  
+  for(int i=0; i < nbLeds ; ++i )
+  {
+    digitalWrite(translate( nbLeds - i), HIGH); 
+    delay(delayInMs) ; 
+    digitalWrite(translate(nbLeds - i), LOW); 
+  }  
+}
 
 
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void setup()
 {
   Serial.begin(9600);
@@ -115,10 +125,9 @@ void setup()
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
   pinMode(12, OUTPUT);
+  welcome_animation(); 
   waitForSwitchOff(); 
 }
-
-
 
 void loop()
 {
@@ -135,12 +144,7 @@ void loop()
     delay(fullLightTime); 
     lightOff();
     //make sure here that switch is turned off 
+    //before entering next loop
     waitForSwitchOff(); 
   }
-
 }
-
-
-
-
-
