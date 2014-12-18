@@ -1,7 +1,7 @@
 const int nbLeds= 9 ; 
 const int offset= 4 ; 
 const int delayInMs = 100 ; 
-const int fullLightTime = 1500; 
+const int fullLightTime = 4000; 
 const int switchCheckPeriod = 200 ; 
 const int dropDelay=400;
 
@@ -42,7 +42,7 @@ void waitForSwitchOff(){
   }
   //blink bottom led to notify that 
   //sensor is ready 
-  blink(ledIdx) ; 
+  blink(0) ; 
 }
 
 int stepHighDelay(int i){
@@ -61,6 +61,7 @@ void spaceship()
     {
       digitalWrite(translate(j), HIGH); 
       delay(stepHighDelay(i));
+      delay(50);
       if (j!= bottom)
       {
         digitalWrite(translate(j), LOW); 
